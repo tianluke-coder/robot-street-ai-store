@@ -1166,3 +1166,457 @@ pre.proto-json {
 .newsec.added .newsec-t {
   color: var(--amber);
 }
+
+/* ============================================================
+   v0.3 双世界布局补充
+   ============================================================ */
+
+/* 覆盖 v0.2 对 #world 的绝对定位，改为流布局（避免脱离文档流撑爆布局） */
+#world {
+  position: static;
+  inset: auto;
+  width: 100%;
+  height: auto;
+}
+
+/* 双世界舞台：左右两列 */
+.stage.dual {
+  display: flex;
+  align-items: stretch;
+}
+.stage.dual .col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 12px;
+}
+.col-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.col-head .dot-human {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+}
+.col-head .dot-star {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+/* 两个世界地图 */
+.street-svg,
+.world-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  background: rgba(8, 12, 28, 0.6);
+  border: 1px solid var(--line);
+}
+.street-svg {
+  aspect-ratio: 900 / 560;
+}
+.world-svg {
+  aspect-ratio: 1300 / 620;
+}
+
+/* 状态卡片 */
+.status-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(10, 16, 36, 0.55);
+}
+.status-card b {
+  color: var(--cyan);
+}
+
+/* 行动记录日志 */
+.log {
+  font-size: 12px;
+  max-height: 160px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(8, 12, 28, 0.5);
+}
+.log-line {
+  padding: 3px 0;
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(120, 160, 255, 0.08);
+  color: var(--text);
+}
+
+/* 顶栏实验选择按钮 */
+.exp-pick {
+  display: flex;
+  gap: 8px;
+}
+.exp-btn {
+  border: 1px solid var(--line-strong);
+  background: rgba(30, 42, 78, 0.7);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.exp-btn:hover {
+  border-color: var(--cyan);
+}
+.exp-btn.active {
+  background: rgba(124, 246, 255, 0.14);
+  border-color: var(--cyan);
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+/* 底部三块 */
+.lower {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.lower-block {
+  flex: 1 1 260px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 12px 14px;
+}
+.disclaimer-block {
+  flex: 2 1 360px;
+}
+.fineprint {
+  font-size: 10.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 8px;
+}
+.fineprint strong {
+  color: var(--amber);
+}
+
+/* 未来商店观察（同一门店面向人 / 面向 AI） */
+.future-store {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(10, 16, 36, 0.55);
+  padding: 10px 12px;
+  font-size: 12px;
+}
+.fs-head {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.fs-cols {
+  display: flex;
+  gap: 12px;
+}
+.fs-col {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: rgba(8, 12, 28, 0.4);
+}
+.fs-col-title {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.fs-col.human .fs-col-title {
+  color: var(--amber);
+}
+.fs-col.ai .fs-col-title {
+  color: var(--cyan);
+}
+.fs-col ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.fs-col li {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.fs-sub {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 4px 0;
+}
+.fs-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 5px 0;
+}
+.kv-chip {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(56, 225, 255, 0.12);
+  border: 1px solid rgba(56, 225, 255, 0.4);
+  color: var(--cyan);
+}
+.fs-endpoint {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  margin-top: 4px;
+  word-break: break-all;
+}
+.fs-note {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 8px;
+  border-top: 1px dashed var(--line);
+  padding-top: 6px;
+  line-height: 1.5;
+}
+.tag-new {
+  font-size: 9px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgba(255, 207, 92, 0.16);
+  border: 1px solid rgba(255, 207, 92, 0.45);
+  color: var(--amber);
+}
+
+/* 线下体验报告 */
+.report-block {
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(8, 12, 28, 0.4);
+}
+.report-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--amber);
+  margin-bottom: 6px;
+}
+.report-item {
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed rgba(120, 160, 255, 0.14);
+}
+.report-item:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+.ri-place {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.ri-sub {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* 比价结果行 */
+.cmp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: rgba(10, 16, 36, 0.6);
+  margin-bottom: 5px;
+  font-size: 11.5px;
+  border-left: 3px solid var(--line-strong);
+}
+.cmp-row.top {
+  border-left-color: var(--green);
+  background: rgba(77, 255, 166, 0.08);
+}
+.cmp-name {
+  flex: 1;
+  font-weight: 600;
+}
+.cmp-score {
+  color: var(--green);
+  font-weight: 700;
+}
+.cmp-store {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* 双世界汇合：主人决策界面 */
+.decision {
+  border: 1px solid var(--amber);
+  border-radius: var(--radius);
+  background: rgba(20, 16, 8, 0.55);
+  box-shadow: 0 0 24px rgba(255, 207, 92, 0.25);
+  padding: 14px 16px;
+}
+.decision.hidden {
+  display: none;
+}
+.dec-head {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--amber);
+  margin-bottom: 10px;
+}
+.dec-cols {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+.dec-col {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(8, 12, 28, 0.5);
+}
+.dec-col-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.dec-col-title.left {
+  color: var(--amber);
+}
+.dec-col-title.right {
+  color: var(--cyan);
+}
+.dec-list {
+  margin: 0;
+  padding-left: 18px;
+}
+.dec-list li {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.dec-star {
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+.dec-star-line {
+  padding: 2px 0;
+  color: var(--text);
+}
+.dec-star-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+.dec-fb {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border: 1px dashed var(--amber);
+  border-radius: 8px;
+}
+.dec-fb-note {
+  font-size: 11.5px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.dec-fb-result {
+  font-size: 11px;
+  color: var(--green);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+.dec-actions {
+  margin: 8px 0 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.dec-ask {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.dec-btn {
+  border: 1px solid var(--line-strong);
+  background: rgba(30, 42, 78, 0.7);
+  color: var(--text);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.dec-btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.dec-final {
+  font-size: 12px;
+  color: var(--amber);
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+/* 把右侧的对话与 JSON 面板改为流布局（不再浮在世界上，避免重叠） */
+.dialogue {
+  position: static;
+  left: auto;
+  top: auto;
+  width: 100%;
+  height: 220px;
+  margin-top: 8px;
+  overflow-y: auto;
+}
+.world-panel {
+  position: static;
+  left: auto;
+  top: auto;
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+/* 窄屏：双列与汇合区改上下排布 */
+@media (max-width: 980px) {
+  .dec-cols {
+    flex-direction: column;
+  }
+  .fs-cols {
+    flex-direction: column;
+  }
+}

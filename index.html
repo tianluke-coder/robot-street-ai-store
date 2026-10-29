@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>机器人街区AI未来商店：数字分身智能体 v0.2</title>
+    <title>机器人街区AI未来商店：数字分身智能体 v0.3</title>
     <link rel="stylesheet" href="./src/style.css" />
   </head>
   <body>
@@ -21,64 +21,95 @@
           <span class="brand-mark">◈</span>
           <div class="brand-text">
             <h1>机器人街区AI未来商店：数字分身智能体</h1>
-            <p class="subtitle">v0.2 · 课程展示 / 概念验证 · 纯前端模拟（无大模型 · 无后端 · 模拟商品）</p>
+            <p class="subtitle">v0.3 · 人类与AI的双世界商业实验 · 纯前端模拟（无大模型 · 无后端 · 模拟商品）</p>
           </div>
         </div>
         <div class="controls">
-          <div class="mode-switch" role="group" aria-label="世界架构模式切换">
+          <div class="exp-pick" role="group" aria-label="选择实验任务">
+            <button id="exp-a" class="exp-btn" type="button">实验A 比价</button>
+            <button id="exp-b" class="exp-btn" type="button">实验B 新品</button>
+            <button id="exp-c" class="exp-btn" type="button">实验C 采购</button>
+          </div>
+          <button id="btn-start" class="btn btn-primary" type="button">▶ 开始双世界实验</button>
+          <button id="btn-pause" class="btn" type="button" disabled>⏸ 暂停</button>
+          <button id="btn-replay" class="btn" type="button">↻ 重播</button>
+          <button id="btn-speed" class="btn" type="button">速度 1×</button>
+          <div class="mode-switch" role="group" aria-label="线上架构模式切换">
             <button id="mode-platform" class="mode-btn active" type="button">▣ 统一平台模式</button>
             <button id="mode-p2p" class="mode-btn" type="button">◆ 独立站点模式</button>
           </div>
-          <button id="btn-start" class="btn btn-primary" type="button">▶ 开始演示</button>
-          <button id="btn-pause" class="btn" type="button" disabled>⏸ 暂停</button>
-          <button id="btn-replay" class="btn" type="button">↻ 重新播放</button>
         </div>
       </header>
 
-      <main class="stage">
-        <div class="stage-main">
-          <section class="arch-strip">
+      <main class="stage dual">
+        <!-- 左侧：线下实体世界 -->
+        <section class="col col-left">
+          <div class="col-head">
+            <span class="dot-human"></span> 线下 · 坂田机器人街区（人类顾客）
+          </div>
+          <svg id="street" class="street-svg" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="坂田机器人街区平面示意图"></svg>
+          <div class="status-card">
+            <span>当前：<b id="human-state">待出发</b></span>
+            <span>线下模拟用时：<b id="human-time">0</b> 分钟</span>
+            <span>位置：<b id="human-place">街区入口</b></span>
+          </div>
+          <div id="human-log" class="log"></div>
+          <div id="future-store" class="future-store" aria-live="polite"></div>
+        </section>
+
+        <!-- 右侧：线上 AI 商业世界 -->
+        <section class="col col-right">
+          <div class="arch-strip">
             <div class="arch-head">
-              <span class="arch-title">架构示意 · <strong id="arch-mode-name">统一平台模式</strong></span>
+              <span class="arch-title">线上架构示意 · <strong id="arch-mode-name">统一平台模式</strong></span>
               <span class="arch-disclaimer" id="arch-disclaimer"></span>
             </div>
             <div class="arch-body">
-              <svg
-                id="arch-diagram"
-                viewBox="0 0 1000 150"
-                preserveAspectRatio="xMidYMid meet"
-                role="img"
-                aria-label="两种模式的架构示意图"
-              ></svg>
+              <svg id="arch-diagram" viewBox="0 0 1000 150" preserveAspectRatio="xMidYMid meet" role="img" aria-label="两种线上架构示意图"></svg>
               <div class="arch-note" id="arch-note"></div>
             </div>
-          </section>
-
-          <section class="world-wrap">
-            <!-- 平面2D世界：主人电脑 + 数字通道 + 三间商店，由 world.js 依据数据渲染 -->
-            <svg
-              id="world"
-              viewBox="0 0 1300 620"
-              preserveAspectRatio="xMidYMid meet"
-              role="img"
-              aria-label="AI分身未来商业世界平面示意图"
-            ></svg>
-
-            <!-- 主人电脑上的微信风格对话窗口（汇报阶段出现） -->
-            <div id="dialogue" class="dialogue hidden" aria-live="polite"></div>
-
-            <!-- 世界下方面板：机器通信 JSON / 比价卡片 / 新品清单 / 订单 -->
-            <div id="world-panel" class="world-panel hidden"></div>
-          </section>
-        </div>
-
-        <aside class="observer" id="observer" aria-label="行动观察面板">
-          <!-- 由 ui.js 动态渲染 -->
-        </aside>
+          </div>
+          <div class="col-head">
+            <span class="dot-star"></span> 线上 · AI商业世界（数字分身 小星）
+          </div>
+          <svg id="world" class="world-svg" viewBox="0 0 1300 620" preserveAspectRatio="xMidYMid meet" role="img" aria-label="AI商业世界平面示意图"></svg>
+          <div class="status-card">
+            <span>当前：<b id="star-state">待机</b></span>
+            <span>AI模拟用时：<b id="star-time">0</b> 秒</span>
+            <span>访问：<b id="star-store">尚未出发</b></span>
+          </div>
+          <div id="star-log" class="log"></div>
+          <div id="dialogue" class="dialogue hidden" aria-live="polite"></div>
+          <div id="world-panel" class="world-panel hidden"></div>
+        </section>
       </main>
 
+      <!-- 双世界汇合：主人决策界面 -->
+      <section id="decision" class="decision hidden" aria-live="polite"></section>
+
+      <!-- 底部：主人条件 / 模式说明 / 免责 -->
+      <section class="lower">
+        <div class="lower-block">
+          <p class="obs-title">主人条件（可调整，改动后立即重算）</p>
+          <div id="ui-controls"></div>
+        </div>
+        <div class="lower-block">
+          <p class="obs-title">线上架构 · 两种模式对比（均为本地程序模拟）</p>
+          <div id="ui-modecmp"></div>
+        </div>
+        <div class="lower-block disclaimer-block">
+          <p class="obs-title">说明与免责</p>
+          <div id="ui-disclaimer"></div>
+          <p class="fineprint">
+            所有商店/商品/交易/时间均为<strong>演示用模拟数据</strong>；坂田机器人街区为真实场所名称的场景还原，
+            但门店体验项目与商品信息均为虚构。数字分身行为由程序状态机与预设规则模拟，并非真实自主AI；
+            未接入大模型API、未执行真实支付、未控制任何机器人硬件。
+          </p>
+        </div>
+      </section>
+
       <footer class="footnote">
-        所有商店、商品与交易均为<strong>演示用模拟数据</strong>，不代表真实电商报价；数字分身行为由程序状态机与预设规则模拟，并非真实自主AI。
+        线下人类体验与线上智能体购物为<strong>同一项主人任务</strong>的两条并行线索；模拟时间为教学参数，不代表实测结果。
       </footer>
     </div>
 

@@ -1,9 +1,9 @@
 {
   "name": "ai-avatar-future-business-world",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "AI分身未来商业世界 v0.1（第二轮迭代）—— 一个纯前端、无后端、无大模型API的2D可视化模拟项目，用于课程展示与概念验证。",
+  "description": "机器人街区AI未来商店：数字分身智能体 v0.3 —— 人类顾客（线下实体店）× AI 数字分身小星（线上智能体商店）双世界并行商业实验；纯前端、无后端、无大模型API、无真实支付，用于课程展示与概念验证。",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

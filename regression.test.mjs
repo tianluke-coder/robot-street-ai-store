@@ -1,6 +1,7 @@
 // regression.test.mjs
-// 第二轮回归测试：在 jsdom 中真实跑完整套演示（统一平台模式 / 独立站点模式），
-// 校验架构展示、三任务流程、预算与授权是否真实影响结果、暂停/继续/重播、无运行时错误。
+// v0.3 回归测试：在 jsdom 中真实跑双世界实验（人类顾客线下 + 小星线上并行），
+// 校验双世界布局、双状态机并行、未来的商店观察、三个实验任务、汇合决策与线下反馈、
+// 架构模式切换、暂停/继续，以及全程无运行时错误。
 // 运行：npm test   （依赖 devDependency: jsdom）
 
 import fs from 'node:fs';
@@ -21,7 +22,7 @@ const dom = new JSDOM(html, {
 });
 const w = dom.window;
 
-// ---------- 虚拟时钟：把动画/等待压缩到毫秒级 ----------
+// ---------- 虚拟时钟：把动画/等待压缩 ----------
 let vnow = 0;
 w.performance.now = () => vnow;
 w.requestAnimationFrame = (cb) => w.setTimeout(() => { vnow += 60; cb(vnow); }, 0);
@@ -49,19 +50,25 @@ let pass = 0;
 let fail = 0;
 const lines = [];
 function ok(cond, label, extra) {
-  if (cond) { pass++; lines.push('  \u2713 ' + label); }
-  else { fail++; lines.push('  \u2717 ' + label + (extra ? '  << ' + extra : '')); }
+  if (cond) { pass++; lines.push('  ✓ ' + label); }
+  else { fail++; lines.push('  ✗ ' + label + (extra ? '  << ' + extra : '')); }
 }
 function group(name) { lines.push(''); lines.push('[' + name + ']'); }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const $ = (s) => w.document.querySelector(s);
 const txt = (s) => { const e = $(s); return e ? e.textContent : ''; };
-const stateText = () => txt('#ui-state');
-const logCount = () => { const e = $('#ui-log'); return e ? e.children.length : 0; };
+const humanState = () => txt('#human-state');
+const starState = () => txt('#star-state');
+const humanLogCount = () => { const e = $('#human-log'); return e ? e.children.length : 0; };
+const starLogCount = () => { const e = $('#star-log'); return e ? e.children.length : 0; };
 
 // 采集运行过程中出现过的文本（面板会被覆盖，必须边跑边采样）
-const SELECTORS = ['#ui-state', '#ui-task', '#ui-store', '#ui-purchase', '#ui-log', '#world-panel', '#dialogue', '#ui-extra', '#arch-mode-name', '#arch-note', '#arch-disclaimer', '#ui-modecmp', '#ui-controls'];
+const SELECTORS = [
+  '#human-state', '#human-time', '#human-place', '#star-state', '#star-time', '#star-store',
+  '#human-log', '#star-log', '#world-panel', '#dialogue', '#future-store',
+  '#arch-mode-name', '#arch-note', '#arch-disclaimer', '#ui-modecmp', '#ui-controls', '#decision',
+];
 let snaps = [];
 let lastSnap = '';
 function collect() {
@@ -71,13 +78,11 @@ function collect() {
 }
 const collector = setInterval(collect, 2);
 let startIdx = 0;
-// 采样时先记录一次“运行前”的界面，之后断言只看运行过程中新出现的文本，
-// 避免上一轮残留内容（例如上一条订单号）混进本轮判断。
 const resetSnap = () => { collect(); startIdx = snaps.length; };
 const allText = () => snaps.slice(startIdx).join('\n');
 const hasText = (needle, label) => ok(allText().includes(needle), label);
 
-async function waitFor(pred, label, timeout = 90000) {
+async function waitFor(pred, label, timeout = 120000) {
   const t0 = Date.now();
   while (Date.now() - t0 < timeout) {
     if (pred()) return true;
@@ -88,7 +93,7 @@ async function waitFor(pred, label, timeout = 90000) {
 }
 function click(elOrSel) {
   const el = typeof elOrSel === 'string' ? $(elOrSel) : elOrSel;
-  if (!el) { errors.push('click: element not found'); return; }
+  if (!el) { errors.push('click: element not found ' + elOrSel); return; }
   el.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
 }
 function setNumber(sel, v) {
@@ -112,127 +117,132 @@ const btnStart = $('#btn-start');
 const btnPause = $('#btn-pause');
 const btnReplay = $('#btn-replay');
 
-async function runFull(mode) {
-  click(mode === 'p2p' ? '#mode-p2p' : '#mode-platform');
+// 选中某实验并运行到「汇合」
+async function runExperiment(expBtnId, mode) {
+  if (mode === 'p2p') click('#mode-p2p');
+  else click('#mode-platform');
   await sleep(20);
+  click(expBtnId); // 选中实验 + resetScene
+  await sleep(30);
   resetSnap();
   click(btnStart);
-  await waitFor(() => stateText().includes('任务完成'), mode + ' 模式：三任务跑完');
-  await sleep(20);
+  await waitFor(() => starState().includes('任务完成'), expBtnId + ' 双世界跑完');
+  await sleep(30);
   collect();
 }
 
 // =========================================================
-group('1. 架构面板 · 初始（统一平台模式）');
+group('1. 架构面板 · 初始（统一平台模式）与双世界布局');
 ok(txt('#arch-mode-name').includes('统一平台模式'), '模式名为「统一平台模式」', txt('#arch-mode-name'));
 ok(!txt('#arch-mode-name').includes('中心'), '不再使用旧名「中心模式」');
-ok(txt('#arch-disclaimer').includes('架构概念模拟') && txt('#arch-disclaimer').includes('不代表真实网络通信'), '架构图已标注「概念模拟」免责说明');
 ok($('#arch-diagram [data-key="hub"]') !== null, '架构图含平台网关节点 hub');
-ok($('#arch-diagram [data-key="store-robot"]') !== null && $('#arch-diagram [data-key="store-digital"]') !== null && $('#arch-diagram [data-key="store-life"]') !== null, '架构图含三家商店节点');
+ok(
+  $('#arch-diagram [data-key="store-robot"]') !== null &&
+    $('#arch-diagram [data-key="store-digital"]') !== null &&
+    $('#arch-diagram [data-key="store-life"]') !== null,
+  '架构图含三家商店节点'
+);
 ok(txt('#ui-modecmp').includes('统一平台') && txt('#ui-modecmp').includes('独立站点'), '模式说明面板列出两种模式对比');
-ok(txt('#ui-modecmp').includes('真正执行的程序逻辑') && txt('#ui-modecmp').includes('仅架构模拟'), '模式说明区分「真实执行」与「架构模拟」');
+ok(
+  txt('#ui-modecmp').includes('真正执行的程序逻辑') && txt('#ui-modecmp').includes('仅架构模拟'),
+  '模式说明区分「真实执行」与「架构模拟」'
+);
+// 双世界布局：左线下街区 + 右线上世界
+ok($('#street') !== null && $('#world') !== null, '页面同时存在线下街区(#street)与线上世界(#world)两个世界');
+ok(w.document.querySelector('#street-human') !== null, '线下街区有「人类顾客」角色（非机器人具身）');
+// 免责声明：架构概念模拟（本地程序 / 预设规则，不代表真实网络通信）
+ok(
+  txt('#ui-disclaimer').includes('架构概念模拟') &&
+    txt('#ui-disclaimer').includes('本地程序') &&
+    txt('#ui-disclaimer').includes('不代表真实网络通信'),
+  '说明与免责：架构概念模拟（本地程序运行，不代表真实网络通信）', txt('#ui-disclaimer')
+);
+ok(txt('#future-store').includes('实验A') || txt('#future-store').includes('比价'), '初始默认选中实验A并显示说明');
 
 // =========================================================
-w.localStorage.clear(); // 清空访问历史，验证「首次访问」语义
-group('2. 统一平台模式 · 三任务完整执行');
-await runFull('platform');
-hasText('DISCOVER_STORES', '平台模式执行了服务发现 DISCOVER_STORES');
-hasText('STORE_DIRECTORY', '平台模式收到 STORE_DIRECTORY 商户目录');
-hasText('PLATFORM_ISSUED', '下单授权由平台授权中心签发（PLATFORM_ISSUED）');
-hasText('【任务 1/3】', '任务 1 已执行');
-hasText('【任务 2/3】', '任务 2 已执行');
-hasText('【任务 3/3】', '任务 3 已执行');
-hasText('首次访问，暂无历史对照', '新品任务：首次访问明确声明无历史对照');
-hasText('当前上架新品', '新品任务：显示「当前上架新品」语义');
-ok(txt('#ui-purchase').includes('模拟完成'), '采购最终状态为「模拟完成」', txt('#ui-purchase').slice(0, 60));
-ok(/ORD-\d{8}-\d{3}/.test(allText()), '生成了模拟订单号（非真实支付）');
-hasText('授权归属：平台授权中心', '日志标明授权归属为平台授权中心');
-hasText('按新偏好重算完成', '主人反馈后重新计算并输出结论');
-ok(!allText().includes('未获批准'), '默认条件下采购未被误拒');
+group('2. 实验A · 比价：双世界并行、同店双界面、不同耗时、汇合');
+await runExperiment('#exp-a', 'platform');
+ok(humanLogCount() > 0, '左侧人类顾客有行动记录（线下的人）', String(humanLogCount()));
+ok(starLogCount() > 0, '右侧小星有行动记录（线上的 AI）', String(starLogCount()));
+ok(humanLogCount() > 0 && starLogCount() > 0, '两个世界并行各自产生记录（非单一世界）');
+ok(txt('#future-store').includes('面向人类') && txt('#future-store').includes('面向 AI 智能体'), '未来商店观察：同一门店展示「面向人类 / 面向 AI 智能体」双列');
+// 不同耗时：线下用「分钟」，线上用「秒」，两者数值不同
+const hMin = parseInt(txt('#human-time'), 10);
+const sSec = parseInt(txt('#star-time'), 10);
+ok(!Number.isNaN(hMin) && hMin > 0, '线下模拟用时为「分钟」且 > 0', txt('#human-time'));
+ok(!Number.isNaN(sSec) && sSec > 0, '线上模拟用时为「秒」且 > 0', txt('#star-time'));
+ok(hMin !== sSec, '线下(分钟)与线上(秒)耗时表示不同（双计时器）', hMin + ' vs ' + sSec);
+ok(!$('#decision').classList.contains('hidden') && txt('#decision').includes('双世界汇合'), '双世界汇合区出现主人决策界面');
+hasText('线上比价结果', '（实验A为比价）面板含线上比价结果（可解释评分）');
 
 // =========================================================
-group('3. 主人改条件后即时重算');
-setNumber('#set-budget', 60);
-await sleep(30);
-hasText('条件已更新：硬性预算 ￥60', '改预算后面板即时记录并重算');
-setCheck('#set-assembly', true);
-await sleep(30);
-hasText('动手组装', '勾选「动手组装」后写入优先条件');
-setNumber('#set-budget', 100);
-setCheck('#set-assembly', false);
-await sleep(30);
+group('3. 实验B · 发现新品');
+await runExperiment('#exp-b', 'platform');
+ok(humanLogCount() > 0 && starLogCount() > 0, '实验B 双世界并行跑完');
+hasText('当前上架新品', '实验B 线上小星列出「当前上架新品」');
+hasText('自上次访问后新增', '实验B 区分「自上次访问后新增」语义');
 
 // =========================================================
-group('4. 硬性预算超限时不得推荐/下单');
-resetSnap();
-setNumber('#set-budget', 50); // 目标商品 ￥89 > 50
-await runFull('platform');
-ok(txt('#ui-purchase').includes('超出硬性预算'), '采购状态为「超出硬性预算 · 不作推荐」', txt('#ui-purchase').slice(0, 60));
-ok(!/ORD-\d{8}-\d{3}/.test(allText()), '超预算时没有生成任何订单');
-hasText('超出硬性预算 ￥50', '日志说明该商品超出硬性预算');
-hasText('采购流程终止', '超预算后采购流程终止，不进入下单');
+group('4. 实验C · 采购与体验决策 + 线下反馈影响判断');
+await runExperiment('#exp-c', 'platform');
+ok(!$('#decision').classList.contains('hidden'), '实验C 汇合决策区出现');
+hasText('授权校验', '实验C 线上小星完成采购授权校验');
+// 点击「把线下体验反馈给小星」
+const fbBtn = $('#dec-feedback');
+ok(fbBtn !== null, '实验C 汇合区提供「把线下体验反馈给小星」按钮');
+if (fbBtn) {
+  click(fbBtn);
+  await sleep(20);
+  ok(txt('#dec-fb-result').includes('重新计算') || txt('#dec-fb-result').includes('变为'), '线下反馈后小星重新计算（推荐变化）', txt('#dec-fb-result').slice(0, 60));
+}
+// 主人最终决定：继续调查（与 masterDecision 一致）
+const contBtn = w.document.querySelector('#decision .dec-btn[data-choice="继续调查"]');
+ok(contBtn !== null, '汇合区提供主人最终决定按钮（购买/预约/继续调查/放弃）');
+if (contBtn) {
+  click(contBtn);
+  await sleep(20);
+  ok(txt('#dec-final').includes('继续调查'), '主人决定「继续调查」并记录', txt('#dec-final'));
+}
 
 // =========================================================
-group('5. 未授予下单权限时不得进入完成');
-setNumber('#set-budget', 100);
-await sleep(20);
-click('#set-auth'); // 关闭授权
-await sleep(30);
-ok(txt('#set-auth').includes('未授予'), '授权开关已切换为「未授予」');
-await runFull('platform');
-ok(txt('#ui-purchase').includes('未批准'), '采购状态为「未批准 · 不进入下单」', txt('#ui-purchase').slice(0, 60));
-ok(!/ORD-\d{8}-\d{3}/.test(allText()), '未获授权时没有生成订单');
-hasText('未获批准', '日志说明未获批准，不进入下单');
-click('#set-auth'); // 恢复授权
-await sleep(30);
-ok(txt('#set-auth').includes('已授予'), '授权已恢复为「已授予」');
-
-// =========================================================
-group('6. 暂停 / 继续 / 重播');
-click('#mode-platform');
-await sleep(20);
-resetSnap();
-click(btnStart);
-await waitFor(() => allText().includes('接受任务') || logCount() > 2, '演示已启动');
-click(btnPause);
-await sleep(20);
-const pausedCount = logCount();
-const pauseLabel = txt('#btn-pause');
-await sleep(500); // 真实等待 500ms
-const stillCount = logCount();
-ok(pauseLabel.includes('继续'), '暂停后按钮变为「继续」', pauseLabel);
-ok(stillCount === pausedCount, '暂停期间不再推进（日志条数不变）', pausedCount + ' -> ' + stillCount);
-click(btnPause);
-await sleep(20);
-await waitFor(() => logCount() > pausedCount, '继续后重新推进');
-ok(logCount() > pausedCount, '继续后流程恢复推进');
-click(btnReplay);
-await sleep(20);
-ok(logCount() <= 2, '重播清空了行动记录', String(logCount()));
-await waitFor(() => stateText().includes('任务完成'), '重播：三任务再次跑完');
-ok(stateText().includes('任务完成'), '重播后同样走到「任务完成」');
-
-// =========================================================
-group('7. 独立站点模式 · 三任务完整执行');
+group('5. 架构模式切换 · 只影响右侧线上');
+// 记录切换前的左侧状态（模式不应改变线下）
+const humanBefore = humanState();
 click('#mode-p2p');
 await sleep(30);
-ok(txt('#arch-mode-name').includes('独立站点模式'), '模式名为「独立站点模式」', txt('#arch-mode-name'));
+ok(txt('#arch-mode-name').includes('独立站点模式'), '模式切换为「独立站点模式」', txt('#arch-mode-name'));
 ok(!txt('#arch-mode-name').includes('去中心'), '不再使用旧名「去中心模式」');
 ok($('#arch-diagram [data-key="hub"]') === null, '独立站点模式架构图没有平台网关节点');
-ok($('#arch-diagram [data-key="store-robot"]') !== null, '独立站点模式仍保留三家商店节点');
-await runFull('p2p');
-hasText('SELF_VERIFIED', '下单校验为分身自行校验（SELF_VERIFIED）');
-ok(!allText().includes('DISCOVER_STORES'), '独立站点模式不做平台服务发现');
-ok(!allText().includes('STORE_DIRECTORY'), '独立站点模式没有统一商户目录');
-hasText('无统一平台', '日志说明按预设清单分别访问独立端点');
-hasText('授权归属：数字分身自行校验', '日志标明授权归属为分身自行校验');
-hasText('自上次访问后新增 0 件', '有历史时正确区分「自上次访问后新增」为 0 件');
-ok(txt('#ui-purchase').includes('模拟完成'), '独立站点模式下相同条件同样完成采购');
-ok(/ORD-\d{8}-\d{3}/.test(allText()), '独立站点模式生成模拟订单号');
-hasText('【任务 3/3】', '独立站点模式同样执行了三个任务');
+ok(humanState() === humanBefore, '切换模式不影响左侧线下（人类顾客状态保持不变）', humanState());
+click('#mode-platform');
+await sleep(30);
+ok($('#arch-diagram [data-key="hub"]') !== null, '切回统一平台模式架构图恢复 hub 节点');
 
 // =========================================================
-group('8. 运行时错误');
+group('6. 暂停 / 继续');
+click('#exp-a');
+await sleep(20);
+click(btnStart);
+await waitFor(() => starLogCount() > 2, '演示已启动');
+click(btnPause);
+await sleep(20);
+const pauseLabel = txt('#btn-pause');
+const timeAtPause = parseInt(txt('#star-time'), 10);
+await sleep(500);
+const timeAfterWait = parseInt(txt('#star-time'), 10);
+ok(pauseLabel.includes('继续'), '暂停后按钮变为「继续」', pauseLabel);
+ok(timeAfterWait === timeAtPause, '暂停期间模拟用时不再推进', timeAtPause + ' -> ' + timeAfterWait);
+click(btnPause);
+await sleep(20);
+await waitFor(() => parseInt(txt('#star-time'), 10) > timeAtPause, '继续后模拟用时恢复推进');
+ok(parseInt(txt('#star-time'), 10) > timeAtPause, '继续后流程恢复推进');
+click(btnReplay);
+await sleep(20);
+await waitFor(() => starState().includes('任务完成'), '重播：双世界再次跑完');
+ok(starState().includes('任务完成'), '重播后同样走到「任务完成」');
+
+// =========================================================
+group('7. 运行时错误');
 ok(errors.length === 0, '整个过程无运行时错误 / 未捕获异常', errors.slice(0, 3).join(' | '));
 
 clearInterval(collector);

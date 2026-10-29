@@ -4,6 +4,20 @@
 
 import { SCENARIO, INTEREST_LABELS } from '../data/scenarios.js';
 
+// 线下实物体验反馈：主人把人类顾客在现场发现的问题反馈给小星后，
+// 小星对这些商品的“实物体验分”做临时调整（运行时状态，可重置，不修改原始商品数据）。
+const experienceAdjustments = {};
+
+export function setExperienceAdjust(productId, delta) {
+  experienceAdjustments[productId] = (experienceAdjustments[productId] || 0) + delta;
+}
+export function getExperienceAdjust(productId) {
+  return experienceAdjustments[productId] || 0;
+}
+export function resetExperienceAdjust() {
+  for (const k in experienceAdjustments) delete experienceAdjustments[k];
+}
+
 // 评分权重（集中配置）
 export const SCORING_CONFIG = {
   weights: {
@@ -131,6 +145,14 @@ export function scoreProduct(product, prefs = buildPreferences()) {
     } else {
       unmatched.push('不满足你新增的优先条件：动手组装');
     }
+  }
+
+  // 线下实物体验反馈：人类顾客现场发现的操作问题会折算成体验分，参与排序
+  const adj = getExperienceAdjust(product.id);
+  if (adj !== 0) {
+    score += adj;
+    if (adj < 0) unmatched.push(`线下体验反馈：实物操作困难（体验分 ${adj}）`);
+    else matched.push(`线下体验反馈：实物体验佳（体验分 +${adj}）`);
   }
 
   return { productId: product.id, score, excluded: false, matched, unmatched };

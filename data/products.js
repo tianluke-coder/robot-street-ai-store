@@ -25,6 +25,8 @@ export const PRODUCTS = [
     isNew: false,
     releaseDate: '2026-03-12',
     stock: 15,
+    // 实物体验字段：与规格字段分开保存，代表人类顾客线下看到的真实情况
+    physical: { handsOn: '方便', demo: true, appeal: '高', note: '零件大块、步骤图清晰，小学生可独立完成拼装' },
   },
   {
     id: 's1p2',
@@ -45,6 +47,7 @@ export const PRODUCTS = [
     isNew: false,
     releaseDate: '2025-11-02',
     stock: 22,
+    physical: { handsOn: '方便', demo: true, appeal: '中', note: '上手快，但玩几次就失去新鲜感' },
   },
   {
     id: 's1p3',
@@ -65,6 +68,7 @@ export const PRODUCTS = [
     isNew: true,
     releaseDate: '2026-10-18',
     stock: 6,
+    physical: { handsOn: '困难', demo: false, appeal: '中', note: '需在电脑上配置视觉开发环境，低龄儿童需家长陪同' },
   },
 
   // ---------------- 商店2：数字创作工坊 ----------------
@@ -87,6 +91,7 @@ export const PRODUCTS = [
     isNew: false,
     releaseDate: '2026-01-20',
     stock: 18,
+    physical: { handsOn: '一般', demo: true, appeal: '高', note: '需要看说明书接线，成功点亮时有成就感' },
   },
   {
     id: 's2p2',
@@ -107,6 +112,7 @@ export const PRODUCTS = [
     isNew: false,
     releaseDate: '2025-09-08',
     stock: 999,
+    physical: { handsOn: '方便', demo: false, appeal: '中', note: '看视频轻松，但只是观看、没有实物可摸' },
   },
   {
     id: 's2p3',
@@ -127,6 +133,7 @@ export const PRODUCTS = [
     isNew: true,
     releaseDate: '2026-10-09',
     stock: 12,
+    physical: { handsOn: '方便', demo: true, appeal: '高', note: '插上电脑拖拽积木即可运行，现场演示效果惊艳' },
   },
 
   // ---------------- 商店3：智能生活商店 ----------------
@@ -149,6 +156,7 @@ export const PRODUCTS = [
     isNew: false,
     releaseDate: '2025-12-15',
     stock: 30,
+    physical: { handsOn: '方便', demo: true, appeal: '中', note: '手机一点就亮，老人小孩都会用' },
   },
   {
     id: 's3p2',
@@ -169,6 +177,7 @@ export const PRODUCTS = [
     isNew: false,
     releaseDate: '2026-04-26',
     stock: 25,
+    physical: { handsOn: '一般', demo: true, appeal: '中', note: '接线简单，但读数含义需要讲解' },
   },
   {
     id: 's3p3',
@@ -189,6 +198,7 @@ export const PRODUCTS = [
     isNew: true,
     releaseDate: '2026-10-21',
     stock: 8,
+    physical: { handsOn: '方便', demo: true, appeal: '高', note: '人来即亮、人走渐暗，样板间体验很舒适' },
   },
 ];
 
