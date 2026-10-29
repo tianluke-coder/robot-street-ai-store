@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>机器人街区AI未来商店：数字分身智能体 v0.2</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <!-- 访问地址浮层：显示本机与局域网入口 -->
+    <div id="net-hint" class="net-hint" role="status" aria-live="polite">
+      <span class="nh-dot"></span>
+      <span class="nh-label">访问地址</span>
+      <span class="nh-item">本机：<code id="nh-local">…</code></span>
+      <span class="nh-item">局域网：<code id="nh-net">…</code></span>
+      <button id="nh-close" class="nh-close" type="button" aria-label="关闭提示">×</button>
+    </div>
+
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark">◈</span>
+          <div class="brand-text">
+            <h1>机器人街区AI未来商店：数字分身智能体</h1>
+            <p class="subtitle">v0.2 · 课程展示 / 概念验证 · 纯前端模拟（无大模型 · 无后端 · 模拟商品）</p>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="mode-switch" role="group" aria-label="世界架构模式切换">
+            <button id="mode-platform" class="mode-btn active" type="button">▣ 统一平台模式</button>
+            <button id="mode-p2p" class="mode-btn" type="button">◆ 独立站点模式</button>
+          </div>
+          <button id="btn-start" class="btn btn-primary" type="button">▶ 开始演示</button>
+          <button id="btn-pause" class="btn" type="button" disabled>⏸ 暂停</button>
+          <button id="btn-replay" class="btn" type="button">↻ 重新播放</button>
+        </div>
+      </header>
+
+      <main class="stage">
+        <div class="stage-main">
+          <section class="arch-strip">
+            <div class="arch-head">
+              <span class="arch-title">架构示意 · <strong id="arch-mode-name">统一平台模式</strong></span>
+              <span class="arch-disclaimer" id="arch-disclaimer"></span>
+            </div>
+            <div class="arch-body">
+              <svg
+                id="arch-diagram"
+                viewBox="0 0 1000 150"
+                preserveAspectRatio="xMidYMid meet"
+                role="img"
+                aria-label="两种模式的架构示意图"
+              ></svg>
+              <div class="arch-note" id="arch-note"></div>
+            </div>
+          </section>
+
+          <section class="world-wrap">
+            <!-- 平面2D世界：主人电脑 + 数字通道 + 三间商店，由 world.js 依据数据渲染 -->
+            <svg
+              id="world"
+              viewBox="0 0 1300 620"
+              preserveAspectRatio="xMidYMid meet"
+              role="img"
+              aria-label="AI分身未来商业世界平面示意图"
+            ></svg>
+
+            <!-- 主人电脑上的微信风格对话窗口（汇报阶段出现） -->
+            <div id="dialogue" class="dialogue hidden" aria-live="polite"></div>
+
+            <!-- 世界下方面板：机器通信 JSON / 比价卡片 / 新品清单 / 订单 -->
+            <div id="world-panel" class="world-panel hidden"></div>
+          </section>
+        </div>
+
+        <aside class="observer" id="observer" aria-label="行动观察面板">
+          <!-- 由 ui.js 动态渲染 -->
+        </aside>
+      </main>
+
+      <footer class="footnote">
+        所有商店、商品与交易均为<strong>演示用模拟数据</strong>，不代表真实电商报价；数字分身行为由程序状态机与预设规则模拟，并非真实自主AI。
+      </footer>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
