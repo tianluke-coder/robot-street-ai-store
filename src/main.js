@@ -541,26 +541,22 @@ async function runDemo() {
   updateButtons();
 }
 
-// ---------- 访问地址浮层（本机 / 局域网） ----------
+// ---------- 访问地址提示条（显示本机局域网入口） ----------
 function setupNetHint() {
   const hint = document.getElementById('net-hint');
-  const localEl = document.getElementById('nh-local');
   const netEl = document.getElementById('nh-net');
   const closeEl = document.getElementById('nh-close');
-  if (!hint || !localEl || !netEl) return;
+  if (!netEl) return;
 
-  const port = location.port || (location.protocol === 'https:' ? '443' : '80');
-  const host = location.hostname;
-  const localURL = `http://127.0.0.1:${port}/`;
-  // 如果已经是经局域网 IP/域名访问，就直接回显真实地址；否则提示用本机局域网 IP 替换
-  const netURL =
-    host === '127.0.0.1' || host === 'localhost' || host === '[::1]'
-      ? `http://<本机局域网IP>:${port}/`
-      : `${location.protocol}//${host}:${port}/`;
-  localEl.textContent = localURL;
+  // 服务器在 dev/build 时把本机局域网 IP 注入 window.__LAN_INFO__，比浏览器自取更可靠
+  const info = (typeof window !== 'undefined' && window.__LAN_INFO__) || null;
+  const port =
+    info && info.port ? info.port : location.port || (location.protocol === 'https:' ? '443' : '80');
+  const lanIP = info && info.ip ? info.ip : null;
+  const netURL = lanIP ? `http://${lanIP}:${port}/` : `http://<本机局域网IP>:${port}/`;
   netEl.textContent = netURL;
 
-  if (closeEl) closeEl.addEventListener('click', () => hint.classList.add('hidden'));
+  if (closeEl && hint) closeEl.addEventListener('click', () => hint.classList.add('hidden'));
 }
 
 // ---------- 初始静态世界 ----------

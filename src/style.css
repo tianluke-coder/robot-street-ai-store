@@ -29,26 +29,22 @@ body {
   height: 100%;
 }
 
-/* ---------- 访问地址浮层 ---------- */
+/* ---------- 访问地址提示条（顶部，不遮挡内容） ---------- */
 .net-hint {
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 7px 12px 7px 14px;
+  gap: 10px;
+  width: fit-content;
+  max-width: calc(100vw - 24px);
+  margin: 8px auto 0;
+  padding: 6px 12px;
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: 10px;
   background: rgba(14, 21, 48, 0.92);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   font-size: 12px;
   color: var(--text);
   white-space: nowrap;
-  max-width: calc(100vw - 24px);
   overflow: hidden;
 }
 .net-hint.hidden {
@@ -66,9 +62,6 @@ body {
   color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.5px;
-}
-.net-hint .nh-item {
-  color: var(--muted);
 }
 .net-hint code {
   color: var(--cyan);
