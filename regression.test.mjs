@@ -32,6 +32,7 @@ const def = (k, v) => Object.defineProperty(globalThis, k, { value: v, writable:
 def('window', w);
 def('document', w.document);
 def('navigator', w.navigator);
+def('location', w.location);
 def('localStorage', w.localStorage);
 def('performance', w.performance);
 def('requestAnimationFrame', w.requestAnimationFrame);
