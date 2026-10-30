@@ -8,3 +8,6 @@ dist/
 # 系统/编辑器
 .DS_Store
 *.log
+
+# WorkBuddy 应用发布标记（含沙箱ID，仅本机有效）
+.wbapp_*.genie
